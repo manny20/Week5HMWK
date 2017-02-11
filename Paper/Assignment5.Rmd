@@ -1,0 +1,44 @@
+---
+title: "Assignment5"
+author: "Emmanuel Farrugia"
+date: "February 8, 2017"
+output:
+  pdf_document: default
+  html_document: default
+  toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(plyr)
+library(gdata)
+
+```
+
+## Rolling Housing Sales for NYC
+
+This R Markdown project contains data of [Rolling Housing Sales for NYC](http://www1.nyc.gov/home/search/index.page?search-terms=Rolling+sales+update).
+
+Using the data for Brooklyn we attempt to explain patterns in the data set.
+
+## Plots of Sold Homes in Brooklyn
+
+A scatter plot of Gross Square feet against Sales Price highlighting that the distribution is heavily right skewed, plot 1. A log of base ten of the data set yeilds a distribution that appears more normal with a clustering of data points the center. It does appear however that the larger the gross square footage of an apartment the more expensive it is, visually there appears to show evidence of some positive correlation.
+
+```{r bk, echo=FALSE}
+setwd("C:/Users/EFarrugia/Documents/MSDS/DDS/Week5/Week5HMWK")
+bk <- read.csv("rollingsales_brooklyn.csv",skip=4,header=TRUE)
+bk$SALE.PRICE.N <- as.numeric(gsub("[^[:digit:]]","", bk$SALE.PRICE))
+names(bk) <- tolower(names(bk))
+bk$gross.sqft <- as.numeric(gsub("[^[:digit:]]","", bk$gross.square.feet))
+bk$land.sqft <- as.numeric(gsub("[^[:digit:]]", "",bk$land.square.feet))
+bk$year.built <- as.numeric(as.character(bk$year.built))
+bk.sale <- bk[bk$sale.price.n!=0,]
+bk.homes <- bk.sale[which(grepl("FAMILY",bk.sale$building.class.category)),]
+bk.homes$outliers <- (log10(bk.homes$sale.price.n) <=5) + 0
+bk.homes <- bk.homes[which(bk.homes$outliers==0),]
+plot(bk.sale$gross.sqft,bk.sale$sale.price.n, main = "Gross SqFt vs Sale Price", xlab = "Gross SqFt", ylab = "Sale Price")
+#plot(log10(bk.sale$gross.sqft),log10(bk.sale$sale.price.n)) Log 10 of gross sqft and sale price
+plot(log10(bk.homes$gross.sqft),log10(bk.homes$sale.price.n), main= "Log Plot of Gross Sqft and Sale Price", xlab = "Gross Sqft", ylab = "Sale Price")
+```
+
